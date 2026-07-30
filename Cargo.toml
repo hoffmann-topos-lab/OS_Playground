@@ -1,0 +1,19 @@
+[package]
+name = "os_playground"
+version = "0.1.0"
+edition = "2024"
+default-run = "os_playground"
+
+[[bin]]
+name = "os_playground"
+path = "src/main.rs"
+
+# Utilitário de build: gera os ícones (fundo removido) a partir de logo.png.
+[[bin]]
+name = "make_icons"
+path = "src/bin/make_icons.rs"
+
+[dependencies]
+eframe = "0.35.0"
+image = "0.25.10"
+sysinfo = "0.39.6"

@@ -1,0 +1,8 @@
+# Rust
+/target
+
+# Bundle .app (gerado por `make app`)
+/dist
+
+# macOS
+.DS_Store
