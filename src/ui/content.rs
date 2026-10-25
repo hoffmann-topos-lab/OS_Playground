@@ -26,12 +26,12 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::Note(
                 "Essa ilusão não é o paralelismo de verdade. O paralelismo de hardware exige \
-                 vários processadores; aqui um único núcleo se reveza entre as tarefas rápido \
+                 vários processadores. Aqui um único núcleo se reveza entre as tarefas rápido \
                  o bastante para parecer simultâneo.",
             ),
             Block::P(
                 "O processo é a abstração criada para orquestrar esse revezamento. Todo o \
-                 software executável da máquina — inclusive o próprio sistema operacional — é \
+                 software executável da máquina, inclusive o próprio sistema operacional, é \
                  organizado como uma coleção de processos sequenciais.",
             ),
             Block::H("O que é um processo"),
@@ -41,7 +41,7 @@ pub const ARTICLES: &[Article] = &[
                  processo tem, portanto, um programa, uma entrada, uma saída e um estado.",
             ),
             Block::P(
-                "É importante separar as duas coisas: o programa é o texto estático no disco; \
+                "É importante separar as duas coisas: o programa é o texto estático no disco, e \
                  o processo é esse programa vivo, em execução, com todo o estado que ele \
                  acumulou até agora.",
             ),
@@ -49,7 +49,7 @@ pub const ARTICLES: &[Article] = &[
             Block::L(&[
                 "Cada processo se comporta como se rodasse na sua própria CPU virtual.",
                 "Na prática existe uma CPU real, que troca a todo momento qual processo está \
-                 sendo executado — é a multiprogramação.",
+                 sendo executado. É a multiprogramação.",
                 "O algoritmo de escalonamento é quem determina quando um processo deve ser \
                  interrompido para atender outro.",
             ]),
@@ -101,7 +101,7 @@ pub const ARTICLES: &[Article] = &[
             Block::H("O fork do UNIX"),
             Block::P(
                 "No UNIX existe apenas uma chamada de sistema para iniciar processos: o fork. \
-                 O que ele faz é peculiar — em vez de criar um processo a partir de um \
+                 O que ele faz é peculiar. Em vez de criar um processo a partir de um \
                  programa, ele duplica o processo que o chamou.",
             ),
             Block::L(&[
@@ -131,7 +131,7 @@ pub const ARTICLES: &[Article] = &[
         summary: "As quatro causas de morte de um processo.",
         blocks: &[
             Block::P(
-                "Um processo pode ser encerrado por quatro causas — duas voluntárias e duas \
+                "Um processo pode ser encerrado por quatro causas, duas voluntárias e duas \
                  involuntárias:",
             ),
             Block::Defs(&[
@@ -170,7 +170,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Hierarquia de processos",
         section: "2.1.4",
         ostep: &[ostep::PROCESS_API],
-        summary: "Por que os processos formam uma árvore no UNIX — e não no Windows.",
+        summary: "Por que os processos formam uma árvore no UNIX, e não no Windows.",
         blocks: &[
             Block::P(
                 "Na maioria dos sistemas operacionais, o processo-pai e o processo-filho \
@@ -181,8 +181,8 @@ pub const ARTICLES: &[Article] = &[
             Block::L(&[
                 "Um processo, todos os seus filhos e todos os seus descendentes formam um \
                  grupo de processos.",
-                "Quando o sistema é inicializado, um processo especial chamado init — presente \
-                 na imagem de inicialização — é o primeiro a subir.",
+                "Quando o sistema é inicializado, um processo especial chamado init, presente \
+                 na imagem de inicialização, é o primeiro a subir.",
                 "O init lê quantos terminais existem e cria um novo processo para cada um.",
                 "É por isso que o init funciona como o processo raiz da árvore de processos: \
                  todo o resto descende dele.",
@@ -194,7 +194,7 @@ pub const ARTICLES: &[Article] = &[
             Block::H("No Windows"),
             Block::P(
                 "O Windows não tem o conceito de hierarquia de processos: todos os processos \
-                 são iguais. O único mecanismo parecido aparece na criação — o pai recebe um \
+                 são iguais. O único mecanismo parecido aparece na criação. O pai recebe um \
                  identificador chamado handle, usado para controlar o filho.",
             ),
             Block::Note(
@@ -210,13 +210,13 @@ pub const ARTICLES: &[Article] = &[
         title: "Estados de um processo",
         section: "2.1.5",
         ostep: &[ostep::PROCESSES],
-        summary: "Em execução, pronto, bloqueado — e as quatro transições.",
+        summary: "Em execução, pronto e bloqueado, com as quatro transições.",
         blocks: &[
             Block::P(
                 "Processos muitas vezes precisam interagir entre si. A saída de um pode ser a \
                  entrada de outro, por exemplo. Dependendo da complexidade e do tempo de \
                  execução dos processos que trabalham em conjunto, um deles pode precisar \
-                 aguardar o outro para entrar em ação — esse tempo de espera é o estado de \
+                 aguardar o outro para entrar em ação. Esse tempo de espera é o estado de \
                  bloqueio.",
             ),
             Block::P(
@@ -242,11 +242,11 @@ pub const ARTICLES: &[Article] = &[
             Block::H("As quatro transições"),
             Block::StateDiagram,
             Block::N(&[
-                "Em execução → Bloqueado: o sistema operacional descobre que o processo não \
+                "Em execução ➡ bloqueado: o sistema operacional descobre que o processo não \
                  pode continuar naquele momento.",
-                "Em execução → Pronto: o escalonador decidiu tirá-lo da CPU.",
-                "Pronto → Em execução: o escalonador decidiu que é a vez dele.",
-                "Bloqueado → Pronto: o evento externo que ele aguardava finalmente aconteceu.",
+                "Em execução ➡ pronto: o escalonador decidiu tirá-lo da CPU.",
+                "Pronto ➡ em execução: o escalonador decidiu que é a vez dele.",
+                "Bloqueado ➡ pronto: o evento externo que ele aguardava finalmente aconteceu.",
             ]),
             Block::Note(
                 "Repare que não existe transição de Bloqueado direto para Em execução. Um \
@@ -269,12 +269,12 @@ pub const ARTICLES: &[Article] = &[
                  processo e depois retomá-lo como se nada tivesse acontecido:",
             ),
             Block::L(&[
-                "contador do programa;",
-                "ponteiro de pilha;",
-                "alocação de memória;",
-                "estado dos arquivos abertos;",
-                "informações de escalonamento;",
-                "estado do processo.",
+                "contador do programa",
+                "ponteiro de pilha",
+                "alocação de memória",
+                "estado dos arquivos abertos",
+                "informações de escalonamento",
+                "estado do processo",
             ]),
             Block::H("Como a ilusão de multiprogramação é criada"),
             Block::L(&[
@@ -307,7 +307,7 @@ pub const ARTICLES: &[Article] = &[
                  processos paralelos. É isso que as threads oferecem.",
             ),
             Block::Note(
-                "Uma forma útil de pensar: threads são processos dentro de processos — \
+                "Uma forma útil de pensar: threads são processos dentro de processos, \
                  mini-processos que compartilham o espaço de endereços de quem os hospeda.",
             ),
             Block::H("Três razões"),
@@ -322,7 +322,7 @@ pub const ARTICLES: &[Article] = &[
                 (
                     "Consumo de recursos",
                     "é mais barato criar e encerrar uma thread do que um processo. Um processo \
-                     exige a alocação de um espaço de memória próprio; a thread nasce dentro do \
+                     exige a alocação de um espaço de memória próprio. A thread nasce dentro do \
                      espaço de memória que já existe.",
                 ),
                 (
@@ -382,7 +382,7 @@ pub const ARTICLES: &[Article] = &[
             Block::H("As complicações que aparecem"),
             Block::P(
                 "Compartilhar o espaço de endereços resolve problemas, mas cria outros. Três \
-                 deles não têm resposta única — cada sistema operacional decide de um jeito:",
+                 deles não têm resposta única, e cada sistema operacional decide de um jeito:",
             ),
             Block::N(&[
                 "Se um processo-pai tem múltiplas threads e é bifurcado, o processo-filho \
@@ -390,7 +390,7 @@ pub const ARTICLES: &[Article] = &[
                 "Como lidar com uma thread que se encerra segurando um recurso que outra \
                  thread está usando?",
                 "Se uma thread percebe que precisa de mais memória, faz a solicitação de \
-                 alocação e passa a vez, a thread seguinte pode fazer o mesmo pedido — e o \
+                 alocação e passa a vez, a thread seguinte pode fazer o mesmo pedido, e o \
                  número de solicitações dobra.",
             ]),
         ],
@@ -438,7 +438,7 @@ pub const ARTICLES: &[Article] = &[
             ]),
             Block::P(
                 "Essa estrutura de atributos contém o tamanho da pilha, parâmetros de \
-                 escalonamento e outros itens secundários — é ela que as chamadas \
+                 escalonamento e outros itens secundários. É ela que as chamadas \
                  pthread_attr_init e pthread_attr_destroy manipulam.",
             ),
         ],
@@ -455,14 +455,14 @@ pub const ARTICLES: &[Article] = &[
         summary: "Espaço de usuário, espaço de kernel, e a abordagem híbrida.",
         blocks: &[
             Block::P(
-                "As threads podem ser implementadas em dois lugares — no espaço do usuário ou \
-                 no espaço do kernel — e ainda existe uma terceira via, híbrida. Cada uma tem \
+                "As threads podem ser implementadas em dois lugares, no espaço do usuário ou \
+                 no espaço do kernel, e ainda existe uma terceira via, híbrida. Cada uma tem \
                  suas vantagens e desvantagens.",
             ),
             Block::H("No espaço do usuário"),
             Block::P(
                 "A primeira abordagem coloca o pacote de threads inteiramente no espaço do \
-                 usuário, de maneira que o kernel não enxerga as threads — só os processos. \
+                 usuário, de maneira que o kernel não enxerga as threads, só os processos. \
                  Nesse modelo as threads são executadas sobre um sistema em tempo de execução, \
                  e é preciso manter uma tabela de threads dentro do processo, parecida com a \
                  que o kernel mantém para tabular seus processos.",
@@ -508,7 +508,7 @@ pub const ARTICLES: &[Article] = &[
             Block::P(
                 "A abordagem híbrida usa threads de kernel e então multiplexa threads de \
                  usuário sobre elas. O programador define quantas serão as threads de núcleo e \
-                 quantas serão as threads multiplexadas — ficando com o controle fino do \
+                 quantas serão as threads multiplexadas. Assim mantém o controle fino do \
                  espaço de usuário sem abrir mão do que o kernel enxerga.",
             ),
         ],
@@ -539,7 +539,7 @@ pub const ARTICLES: &[Article] = &[
                         "É a unidade de execução: contador de programa, registradores, pilha.",
                     ),
                     (
-                        "Criar exige alocar um espaço de memória — é caro.",
+                        "Criar exige alocar um espaço de memória, por isso é caro.",
                         "Criar é barato: acontece dentro de um espaço de memória que já existe.",
                     ),
                     (
@@ -560,7 +560,7 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::Note(
                 "Justamente porque as threads compartilham dados sem barreira nenhuma entre \
-                 si, elas herdam todos os problemas de concorrência dos processos — e sem a \
+                 si, elas herdam todos os problemas de concorrência dos processos, sem a \
                  proteção que espaços de endereços separados davam de graça.",
             ),
             Block::SeeAlso(
@@ -578,6 +578,6 @@ mod tests {
 
     #[test]
     fn conteudo_valido() {
-        check::articles(ARTICLES);
+        check::articles(ARTICLES, '2');
     }
 }

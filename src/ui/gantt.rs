@@ -38,7 +38,7 @@ const fn rgb(r: u8, g: u8, b: u8) -> egui::Color32 {
     egui::Color32::from_rgb(r, g, b)
 }
 
-fn series_color(i: usize, dark: bool) -> egui::Color32 {
+pub fn series_color(i: usize, dark: bool) -> egui::Color32 {
     let (light, dk) = SERIES[i % SERIES.len()];
     if dark { dk } else { light }
 }

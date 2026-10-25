@@ -64,7 +64,7 @@ static MLFQ: Scenario = Scenario {
     policy: Policy::MultiQueue,
     jobs: BASE,
     quantum: 1,
-    hint: "Quem gasta o quantum inteiro desce de classe — e ganha um quantum maior.",
+    hint: "Quem gasta o quantum inteiro desce de classe e ganha um quantum maior.",
 };
 
 static LOTTERY: Scenario = Scenario {
@@ -81,7 +81,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Introdução ao escalonamento",
         section: "2.5 e 2.5.1",
         ostep: &[ostep::SCHEDULING],
-        summary: "Quem decide qual processo roda — e por que a troca custa caro.",
+        summary: "Quem decide qual processo roda, e por que a troca custa caro.",
         blocks: &[
             Block::P(
                 "Computadores modernos executam múltiplos processos e threads ao mesmo tempo, \
@@ -100,7 +100,7 @@ pub const ARTICLES: &[Article] = &[
             Block::H("A troca de contexto é cara"),
             Block::P(
                 "Além de escolher qual processo executar, o escalonador precisa usar a CPU de \
-                 forma eficiente — porque trocar de processo tem um custo próprio:",
+                 forma eficiente, porque trocar de processo tem um custo próprio:",
             ),
             Block::N(&[
                 "É preciso passar do modo usuário para o modo kernel.",
@@ -181,7 +181,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Note(
                 "Nas demonstrações a seguir, essa diferença fica visível de imediato: nos \
                  algoritmos não-preemptivos cada processo aparece como um bloco contínuo no \
-                 Gantt; nos preemptivos, ele aparece picotado.",
+                 Gantt. Nos preemptivos, ele aparece picotado.",
             ),
         ],
     },
@@ -199,7 +199,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Defs(&[
                 (
                     "Lote",
-                    "ainda usados para operações contáveis — folhas de pagamento, estoque, \
+                    "ainda usados para operações contáveis, como folhas de pagamento, estoque, \
                      cálculo de juros. Não há usuário aguardando resposta no terminal, o que \
                      permite algoritmos não-preemptivos, ou preemptivos com fatias longas.",
                 ),
@@ -230,25 +230,25 @@ pub const ARTICLES: &[Article] = &[
                 &[
                     (
                         "Lote",
-                        "Vazão (maximizar tarefas por hora); tempo de retorno (minimizar o \
-                         tempo entre submissão e término); utilização de CPU (mantê-la \
+                        "Vazão (maximizar tarefas por hora), tempo de retorno (minimizar o \
+                         tempo entre submissão e término), utilização de CPU (mantê-la \
                          ocupada o tempo todo).",
                     ),
                     (
                         "Interativo",
-                        "Tempo de resposta (responder rápido às requisições); \
+                        "Tempo de resposta (responder rápido às requisições), \
                          proporcionalidade (atender às expectativas do usuário).",
                     ),
                     (
                         "Tempo real",
-                        "Cumprimento de prazos (evitar perda de dados); previsibilidade \
+                        "Cumprimento de prazos (evitar perda de dados), previsibilidade \
                          (evitar degradação da qualidade em sistemas multimídia).",
                     ),
                 ],
             ),
             Block::Note(
-                "As duas métricas que o simulador mostra — tempo de espera e tempo de \
-                 retorno médios — são metas de sistemas em lote. Um algoritmo pode ser ruim \
+                "As duas métricas que o simulador mostra, tempo de espera e tempo de \
+                 retorno médios, são metas de sistemas em lote. Um algoritmo pode ser ruim \
                  nelas e ainda assim ser o certo para um sistema interativo, onde o que \
                  importa é o tempo de resposta.",
             ),
@@ -259,7 +259,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Primeiro a chegar, primeiro a ser servido",
         section: "2.5.2",
         ostep: &[ostep::SCHEDULING],
-        summary: "FCFS — o não-preemptivo mais simples que existe.",
+        summary: "FCFS, o não-preemptivo mais simples que existe.",
         blocks: &[
             Block::P(
                 "É o algoritmo não-preemptivo mais simples: a CPU é distribuída unicamente \
@@ -270,7 +270,7 @@ pub const ARTICLES: &[Article] = &[
                 "Vantagem",
                 "Desvantagem",
                 &[(
-                    "Fácil de compreender e de programar — uma única lista encadeada \
+                    "Fácil de compreender e de programar, com uma única lista encadeada \
                      controla todos os processos.",
                     "O uso do tempo não é otimizado: um processo longo na frente segura todo \
                      mundo atrás dele.",
@@ -289,7 +289,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Tarefa mais curta primeiro",
         section: "2.5.2",
         ostep: &[ostep::SCHEDULING],
-        summary: "SJF — ótimo, quando dá para saber a duração de antemão.",
+        summary: "SJF, ótimo quando dá para saber a duração de antemão.",
         blocks: &[
             Block::P(
                 "Algoritmo não-preemptivo que presume o conhecimento prévio do tempo de \
@@ -304,7 +304,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Scheduler(&SJF),
             Block::Note(
                 "Mesma carga do FCFS, só a política mudou. Compare o tempo de espera médio \
-                 entre as duas telas — a diferença é o efeito isolado do algoritmo.",
+                 entre as duas telas. A diferença é o efeito isolado do algoritmo.",
             ),
         ],
     },
@@ -313,7 +313,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Tempo restante mais curto",
         section: "2.5.2",
         ostep: &[ostep::SCHEDULING],
-        summary: "SRTF — a versão preemptiva do anterior.",
+        summary: "SRTF, a versão preemptiva do anterior.",
         blocks: &[
             Block::P(
                 "É a versão preemptiva do escalonamento por tarefa mais curta. Em vez de \
@@ -349,20 +349,20 @@ pub const ARTICLES: &[Article] = &[
             Block::H("O tamanho do quantum"),
             Block::P(
                 "A única questão realmente relevante é definir o tamanho do quantum, porque é \
-                 ele que determina o número de trocas entre processos — e trocas são caras:",
+                 ele que determina o número de trocas entre processos, e trocas são caras:",
             ),
             Block::Table2(
                 "Quantum muito curto",
                 "Quantum muito longo",
                 &[(
-                    "Trocas demais; o tempo gasto trocando de contexto reduz a eficiência.",
-                    "Reduz o tempo de resposta médio; no limite, vira FCFS.",
+                    "Trocas demais. O tempo gasto trocando de contexto reduz a eficiência.",
+                    "Reduz o tempo de resposta médio. No limite, vira FCFS.",
                 )],
             ),
             Block::Note(
                 "Algo em torno de 20 a 50 ms costuma ser o desejável. No simulador abaixo, \
                  arraste o quantum de 1 até 8 e observe os dois extremos: com 1, o Gantt \
-                 vira uma grade fina; com 8, os blocos se fundem e o resultado fica igual ao \
+                 vira uma grade fina. Com 8, os blocos se fundem e o resultado fica igual ao \
                  do FCFS.",
             ),
             Block::Scheduler(&RR),
@@ -397,7 +397,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Warn(
                 "O simulador usa prioridades estáticas, para deixar o efeito puro do \
                  critério visível. Repare que P1, de prioridade baixa, só roda quando não \
-                 sobra ninguém melhor — é a inanição em miniatura. Baixe a prioridade de P2 \
+                 sobra ninguém melhor. É a inanição em miniatura. Baixe a prioridade de P2 \
                  e veja P1 destravar.",
             ),
         ],
@@ -415,7 +415,7 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::P(
                 "Um processo na classe mais alta recebe um quantum. Quando termina esse \
-                 quantum sem concluir, ele é rebaixado uma classe — e o número de quanta que \
+                 quantum sem concluir, ele é rebaixado uma classe, e o número de quanta que \
                  ele recebe é multiplicado por dois.",
             ),
             Block::Note(
@@ -425,7 +425,7 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::Scheduler(&MLFQ),
             Block::P(
-                "No simulador, o quantum ajustável é o da classe mais alta; cada classe \
+                "No simulador, o quantum ajustável é o da classe mais alta, e cada classe \
                  abaixo dobra esse valor.",
             ),
         ],
@@ -444,7 +444,7 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::P(
                 "Processos com maior prioridade recebem mais bilhetes, o que aumenta a chance \
-                 de serem sorteados — mas não a garante. A proporção de CPU que cada processo \
+                 de serem sorteados, mas não a garante. A proporção de CPU que cada processo \
                  recebe tende à proporção de bilhetes que ele tem.",
             ),
             Block::Scheduler(&LOTTERY),
@@ -469,8 +469,8 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::P(
                 "Nas threads de usuário, o kernel enxerga apenas o processo. Ele escalona \
-                 esse processo normalmente, e então um segundo algoritmo de escalonamento — \
-                 semelhante aos que estudamos — decide como repartir, entre as threads, os \
+                 esse processo normalmente, e então um segundo algoritmo de escalonamento, \
+                 semelhante aos que estudamos, decide como repartir, entre as threads, os \
                  recursos computacionais que couberam ao processo.",
             ),
             Block::Warn(
@@ -494,6 +494,6 @@ mod tests {
 
     #[test]
     fn conteudo_valido() {
-        check::articles(ARTICLES);
+        check::articles(ARTICLES, '2');
     }
 }

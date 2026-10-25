@@ -408,7 +408,7 @@ fn caption(ui: &mut egui::Ui, demo: &Demo, from: &Frame, to: &Frame, st: &DemoSt
     if st.idx == last && !st.playing {
         let (icon, color, text) = match &demo.outcome {
             Outcome::Holds(t) => ("✔", SAFE, *t),
-            Outcome::Breaks(t) => ("✘", DANGER, *t),
+            Outcome::Breaks(t) => ("✖", DANGER, *t),
         };
         ui.add_space(6.0);
         egui::Frame::new()

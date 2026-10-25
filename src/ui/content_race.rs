@@ -45,7 +45,7 @@ static LOST_UPDATE: Demo = Demo {
         Frame {
             pc: [None, Some(0)],
             vars: &[("counter", "0"), ("regA", "0"), ("regB", "0")],
-            caption: "B lê o mesmo contador e também vê 0 — o incremento de A ainda não \
+            caption: "B lê o mesmo contador e também vê 0, o incremento de A ainda não \
                       foi escrito.",
             in_cs: [false, false],
             danger: true,
@@ -81,7 +81,7 @@ static LOST_UPDATE: Demo = Demo {
         },
     ],
     outcome: Outcome::Breaks(
-        "Dois incrementos, resultado 1 — o esperado era 2. Uma das atualizações se perdeu.",
+        "Dois incrementos, resultado 1, mas o esperado era 2. Uma das atualizações se perdeu.",
     ),
 };
 
@@ -135,7 +135,7 @@ static LOCK_VARIABLE: Demo = Demo {
         Frame {
             pc: [Some(1), Some(2)],
             vars: &[("lock", "1")],
-            caption: "A retoma do ponto onde parou — ele já tinha testado a trava — e \
+            caption: "A retoma do ponto onde parou, ele já tinha testado a trava, e \
                       escreve 1 nela.",
             in_cs: [false, true],
             danger: false,
@@ -176,7 +176,7 @@ static STRICT_ALTERNATION: Demo = Demo {
         Frame {
             pc: [Some(0), Some(0)],
             vars: &[("turn", "0")],
-            caption: "turn vale 0. O processo 0 passa direto; o 1 fica girando no teste.",
+            caption: "turn vale 0. O processo 0 passa direto. O 1 fica girando no teste.",
             in_cs: [false, false],
             danger: false,
         },
@@ -223,7 +223,7 @@ static STRICT_ALTERNATION: Demo = Demo {
             pc: [Some(0), Some(3)],
             vars: &[("turn", "1")],
             caption: "O processo 0 fica travado esperando, mesmo com a região crítica \
-                      livre — porque o 1 está ocupado fora dela e não devolveu a vez.",
+                      livre, porque o 1 está ocupado fora dela e não devolveu a vez.",
             in_cs: [false, false],
             danger: true,
         },
@@ -281,7 +281,7 @@ static PETERSON: Demo = Demo {
         Frame {
             pc: [Some(2), Some(1)],
             vars: &[("interested", "[V, V]"), ("turn", "0")],
-            caption: "Os dois estão interessados ao mesmo tempo — exatamente o caso que \
+            caption: "Os dois estão interessados ao mesmo tempo, exatamente o caso que \
                       derrubou a variável de trava.",
             in_cs: [false, false],
             danger: false,
@@ -297,7 +297,7 @@ static PETERSON: Demo = Demo {
         Frame {
             pc: [Some(2), Some(3)],
             vars: &[("interested", "[V, V]"), ("turn", "1")],
-            caption: "O 1 testa: turn == 1 e o 0 está interessado — então ele espera.",
+            caption: "O 1 testa: turn == 1 e o 0 está interessado, então ele espera.",
             in_cs: [false, false],
             danger: false,
         },
@@ -384,7 +384,7 @@ static TSL: Demo = Demo {
         Frame {
             pc: [Some(3), Some(2)],
             vars: &[("LOCK", "1"), ("RX de A", "0"), ("RX de B", "1")],
-            caption: "B volta ao início do laço e tenta de novo — espera ocupada.",
+            caption: "B volta ao início do laço e tenta de novo, espera ocupada.",
             in_cs: [true, false],
             danger: false,
         },
@@ -461,7 +461,7 @@ static LOST_WAKEUP: Demo = Demo {
         Frame {
             pc: [Some(3), None],
             vars: &[("count", "1"), ("buffer", "1 item")],
-            caption: "O produtor manda um wakeup — mas o consumidor ainda não dormiu. \
+            caption: "O produtor manda um wakeup, mas o consumidor ainda não dormiu. \
                       O sinal se perde no ar.",
             in_cs: [false, false],
             danger: true,
@@ -517,7 +517,7 @@ static SEMAPHORE: Demo = Demo {
             pc: [None, None],
             vars: &[("cheias", "0"), ("vazias", "4"), ("buffer", "vazio")],
             caption: "Como o semáforo é 0, o down não se completa e o consumidor é posto \
-                      para dormir — tudo isso numa operação atômica.",
+                      para dormir, tudo isso numa operação atômica.",
             in_cs: [false, false],
             danger: false,
         },
@@ -612,7 +612,7 @@ static MUTEX: Demo = Demo {
         Frame {
             pc: [Some(1), None],
             vars: &[("m", "travado")],
-            caption: "B é bloqueado — não fica girando em espera ocupada, sai da fila da CPU.",
+            caption: "B é bloqueado, não fica girando em espera ocupada, sai da fila da CPU.",
             in_cs: [true, false],
             danger: false,
         },
@@ -633,7 +633,7 @@ static MUTEX: Demo = Demo {
         },
     ],
     outcome: Outcome::Holds(
-        "Duas posições só, travado e destravado — sem contador. É o suficiente para \
+        "Duas posições só, travado e destravado, sem contador. É o suficiente para \
          exclusão mútua, e o bloqueio evita queimar CPU.",
     ),
 };
@@ -729,13 +729,13 @@ pub const ARTICLES: &[Article] = &[
             Block::H("Veja acontecer"),
             Block::P(
                 "Abaixo, duas threads incrementam o mesmo contador. Cada incremento são três \
-                 passos — ler, somar, escrever — e é entre esses passos que o escalonador \
+                 passos (ler, somar, escrever) e é entre esses passos que o escalonador \
                  pode trocar de processo. Avance passo a passo:",
             ),
             Block::Demo(&LOST_UPDATE),
             Block::Warn(
                 "Repare que nenhuma das duas threads tem bug. O código de cada uma, lido \
-                 isoladamente, está correto. O defeito só existe na combinação — e só em \
+                 isoladamente, está correto. O defeito só existe na combinação, e só em \
                  alguns entrelaçamentos, o que torna esse tipo de erro difícil de reproduzir.",
             ),
         ],
@@ -780,7 +780,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Note(
                 "Guarde as condições 3 e 4: elas são o critério pelo qual as tentativas das \
                  próximas telas vão ser reprovadas. A alternância explícita, por exemplo, \
-                 garante exclusão mútua e mesmo assim é uma solução ruim — porque tropeça \
+                 garante exclusão mútua e mesmo assim é uma solução ruim, porque tropeça \
                  na condição 3.",
             ),
         ],
@@ -790,7 +790,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Desabilitando interrupções",
         section: "2.4.3",
         ostep: &[ostep::LOCKS],
-        summary: "A solução mais simples — e por que ela não serve.",
+        summary: "A solução mais simples, e por que ela não serve.",
         blocks: &[
             Block::P(
                 "Num sistema de processador único, a solução mais simples é fazer com que \
@@ -816,17 +816,17 @@ pub const ARTICLES: &[Article] = &[
         title: "Variáveis do tipo trava",
         section: "2.4.3",
         ostep: &[ostep::LOCKS],
-        summary: "A primeira tentativa em software — que repete o erro original.",
+        summary: "A primeira tentativa em software, que repete o erro original.",
         blocks: &[
             Block::P(
                 "A ideia é começar com uma única variável de trava, configurada em zero. \
                  Quando um processo tenta entrar na região crítica, ele verifica a trava: se \
-                 estiver em 0, muda para 1 e entra; se já estiver em 1, espera até que ela \
+                 estiver em 0, muda para 1 e entra. Se já estiver em 1, espera até que ela \
                  volte a zero.",
             ),
             Block::P(
                 "Parece resolver. Só que temos aqui exatamente a mesma falha da race \
-                 condition original — só que um nível acima, agora sobre a variável de trava.",
+                 condition original, só que um nível acima, agora sobre a variável de trava.",
             ),
             Block::Demo(&LOCK_VARIABLE),
             Block::Note(
@@ -849,15 +849,15 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::P(
                 "O processo 0 inspeciona turn, encontra zero e entra. O processo 1 também \
-                 inspeciona, encontra zero e fica aguardando — testando a variável \
+                 inspeciona, encontra zero e fica aguardando, testando a variável \
                  continuamente até que ela mude para 1. Essa espera em laço é a espera \
                  ocupada, e uma trava usada assim é chamada de trava giratória.",
             ),
             Block::Demo(&STRICT_ALTERNATION),
             Block::Warn(
                 "O problema aparece quando um processo é bem mais rápido que o outro: o \
-                 rápido termina sua parte não-crítica, quer entrar de novo, e não consegue \
-                 — porque a vez está com o lento, que nem sequer está na região crítica. Um \
+                 rápido termina sua parte não-crítica, quer entrar de novo, e não consegue\
+                 , porque a vez está com o lento, que nem sequer está na região crítica. Um \
                  processo fora da região crítica bloqueou o outro, violando a condição 3.",
             ),
         ],
@@ -884,7 +884,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Demo(&PETERSON),
             Block::Note(
                 "O truque está no fato de os dois escreverem em turn: quem escreve por \
-                 último acaba cedendo a vez. Se só um está interessado, ele entra direto — \
+                 último acaba cedendo a vez. Se só um está interessado, ele entra direto, \
                  e é isso que salva a condição 3, que a alternância explícita violava.",
             ),
         ],
@@ -904,7 +904,7 @@ pub const ARTICLES: &[Article] = &[
                 (
                     "TSL",
                     "test and set lock. Lê o conteúdo de LOCK, envia para o registrador RX e \
-                     armazena um valor diferente de zero em LOCK — tudo isso de forma \
+                     armazena um valor diferente de zero em LOCK, tudo isso de forma \
                      indivisível.",
                 ),
                 (
@@ -925,7 +925,7 @@ pub const ARTICLES: &[Article] = &[
         title: "Dormir e despertar",
         section: "2.4.4",
         ostep: &[ostep::COND_VARS],
-        summary: "Sair da espera ocupada — e o despertar que se perde.",
+        summary: "Sair da espera ocupada, e o despertar que se perde.",
         blocks: &[
             Block::P(
                 "A solução de Peterson e a TSL estão corretas, mas ambas usam espera ocupada: \
@@ -939,14 +939,14 @@ pub const ARTICLES: &[Article] = &[
             Block::P(
                 "Um dos mecanismos mais simples para bloquear em vez de girar é o par \
                  sleep / wakeup. O sleep é uma chamada de sistema que bloqueia o processo que \
-                 a chamou até que outro o desperte; o wakeup recebe como parâmetro o processo \
+                 a chamou até que outro o desperte. O wakeup recebe como parâmetro o processo \
                  que deve ser despertado.",
             ),
             Block::H("O problema do produtor-consumidor"),
             Block::P(
                 "Dois processos compartilham um buffer de tamanho fixo. O produtor insere \
-                 informações; o consumidor retira. O problema aparece quando o produtor quer \
-                 inserir e o buffer está cheio — a solução é fazê-lo dormir e ser despertado \
+                 informações. O consumidor retira. O problema aparece quando o produtor quer \
+                 inserir e o buffer está cheio, a solução é fazê-lo dormir e ser despertado \
                  quando o consumidor tiver removido algum item. O raciocínio inverso vale \
                  quando o consumidor encontra o buffer vazio.",
             ),
@@ -958,7 +958,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Note(
                 "Uma correção possível é adicionar um bit de espera para o sinal de \
                  despertar, guardando o wakeup que chegou cedo demais. Os semáforos \
-                 generalizam justamente essa ideia — trocando um bit por um contador.",
+                 generalizam justamente essa ideia, ao trocar um bit por um contador.",
             ),
         ],
     },
@@ -989,7 +989,7 @@ pub const ARTICLES: &[Article] = &[
             ]),
             Block::Warn(
                 "Cada uma dessas operações é atômica. É essa atomicidade que impede outro \
-                 processo de mexer no semáforo no meio da operação — sem ela, estaríamos de \
+                 processo de mexer no semáforo no meio da operação. Sem ela, estaríamos de \
                  volta ao problema da variável de trava.",
             ),
             Block::Demo(&SEMAPHORE),
@@ -1010,7 +1010,7 @@ pub const ARTICLES: &[Article] = &[
         summary: "O semáforo binário, e a versão rápida do Linux.",
         blocks: &[
             Block::P(
-                "O mutex é um gerenciador de exclusão mútua de recursos compartilhados — uma \
+                "O mutex é um gerenciador de exclusão mútua de recursos compartilhados, uma \
                  versão mais simples dos semáforos, em que não é necessário um contador. É \
                  uma variável compartilhada com apenas dois estados: travado ou destravado. \
                  É especialmente útil para pacotes de threads executados no espaço do usuário.",
@@ -1025,7 +1025,7 @@ pub const ARTICLES: &[Article] = &[
             Block::H("Futexes"),
             Block::P(
                 "Com o paralelismo crescendo, achar um mecanismo de sincronização eficiente \
-                 ficou cada vez mais importante — e as duas famílias que vimos têm forças \
+                 ficou cada vez mais importante, e as duas famílias que vimos têm forças \
                  opostas:",
             ),
             Block::Table2(
@@ -1067,7 +1067,7 @@ pub const ARTICLES: &[Article] = &[
         blocks: &[
             Block::P(
                 "Mesmo com todos esses mecanismos, ainda podem surgir situações em que todos \
-                 os processos ficam bloqueados e nunca terminam — os deadlocks, assunto do \
+                 os processos ficam bloqueados e nunca terminam, os deadlocks, assunto do \
                  capítulo 6. Os monitores foram criados para tratar dessas questões num nível \
                  mais alto.",
             ),
@@ -1080,7 +1080,7 @@ pub const ARTICLES: &[Article] = &[
             Block::Note(
                 "A propriedade decisiva: apenas um processo pode estar ativo dentro do \
                  monitor por vez. E quem implementa isso é o compilador, tipicamente usando \
-                 mutex ou semáforos binários — o programador não escreve a exclusão mútua. \
+                 mutex ou semáforos binários, o programador não escreve a exclusão mútua. \
                  Transformar todas as regiões críticas em procedimentos de monitores garante, \
                  por construção, que dois processos nunca estarão nas suas regiões críticas \
                  ao mesmo tempo.",
@@ -1092,7 +1092,7 @@ pub const ARTICLES: &[Article] = &[
             ),
             Block::L(&[
                 "Quando um procedimento do monitor descobre que não pode continuar, executa \
-                 um wait sobre alguma variável de condição — por exemplo, 'full'. Isso \
+                 um wait sobre alguma variável de condição, por exemplo, 'full'. Isso \
                  bloqueia o processo que chamou e permite que outro entre no monitor.",
                 "O processo que estava bloqueado pode ser liberado por um signal aplicado à \
                  variável de condição que ele estava esperando.",
@@ -1131,7 +1131,7 @@ pub const ARTICLES: &[Article] = &[
             Block::P(
                 "O último mecanismo de sincronização se aplica a grupos de processos. \
                  Aplicações cujas tarefas são divididas em fases exigem que nenhum processo \
-                 prossiga até que todos tenham completado a fase atual — e é para isso que \
+                 prossiga até que todos tenham completado a fase atual, e é para isso que \
                  serve uma barreira em cada fase.",
             ),
             Block::P(
@@ -1159,6 +1159,6 @@ mod tests {
 
     #[test]
     fn conteudo_valido() {
-        check::articles(ARTICLES);
+        check::articles(ARTICLES, '2');
     }
 }
