@@ -1,8 +1,3 @@
-//! OS Playground — ferramenta visual para a disciplina de Sistemas Operacionais.
-//!
-//! Fase 1: janela principal + tópico "Processos e Threads" com a árvore de
-//! processos ao vivo funcional (as demais opções são telas iniciais).
-
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod app;

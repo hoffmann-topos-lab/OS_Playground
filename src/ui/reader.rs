@@ -1,5 +1,5 @@
-//! Leitor de artigos reutilizado pelas três telas de conteúdo (Conceitos, Race
-//! Conditions e Escalonamento).
+//! Leitor de artigos reutilizado pelas telas de conteúdo (Conceitos, Race
+//! Conditions, Escalonamento e as quatro telas de Memória Virtual).
 //!
 //! Aqui ficam o *modelo* do conteúdo ([`Article`], [`Block`]) e a renderização.
 //! Os artigos em si moram em `content*.rs`. O rodapé de referências é montado
@@ -10,15 +10,24 @@ use std::collections::HashMap;
 use eframe::egui;
 
 use crate::app::Screen;
-use crate::ui::demo::{self, Demo, DemoState};
-use crate::ui::gantt::{self, SchedState};
 use crate::ui::ACCENT;
+use crate::ui::demo::{self, Demo, DemoState};
+use crate::ui::fsview;
+use crate::ui::gantt::{self, SchedState};
+use crate::ui::ioview::{self, IoModesState};
+use crate::ui::memaddr::{self, BaseLimitState, PageSizeState, TranslateState};
+use crate::ui::memfit::{self, FitState};
+use crate::ui::pagerepl::{self, ReplState};
 
-const TANENBAUM: &str =
-    "TANENBAUM, A. S.; BOS, H. Sistemas Operacionais Modernos — capítulo 2, seção";
+const TANENBAUM: &str = "TANENBAUM, A. S.; BOS, H. Sistemas Operacionais Modernos — capítulo";
 const OSTEP: &str = "ARPACI-DUSSEAU, R. H.; ARPACI-DUSSEAU, A. C. \
                      Operating Systems: Three Easy Pieces";
 const OSTEP_URL: &str = "https://pages.cs.wisc.edu/~remzi/OSTEP/";
+
+/// O capítulo do Tanenbaum é o primeiro algarismo da seção ("3.4.2" → '3').
+fn chapter_of(section: &str) -> char {
+    section.chars().next().unwrap_or('?')
+}
 
 /// Um capítulo do OSTEP citado por um artigo: rótulo + link direto do PDF.
 ///
@@ -74,13 +83,81 @@ pub mod ostep {
         "capítulo 29 — Locked Data Structures",
         "threads-locks-usage.pdf"
     );
-    chapter!(COND_VARS, "capítulo 30 — Condition Variables", "threads-cv.pdf");
+    chapter!(
+        COND_VARS,
+        "capítulo 30 — Condition Variables",
+        "threads-cv.pdf"
+    );
     chapter!(SEMAPHORES, "capítulo 31 — Semaphores", "threads-sema.pdf");
     chapter!(
         CONC_BUGS,
         "capítulo 32 — Concurrency Bugs",
         "threads-bugs.pdf"
     );
+
+    // ---- Memória virtual (parte II do livro) ----
+    chapter!(
+        ADDRESS_SPACES,
+        "capítulo 13 — Address Spaces",
+        "vm-intro.pdf"
+    );
+    chapter!(
+        ADDRESS_TRANSLATION,
+        "capítulo 15 — Address Translation",
+        "vm-mechanism.pdf"
+    );
+    chapter!(
+        FREE_SPACE,
+        "capítulo 17 — Free-Space Management",
+        "vm-freespace.pdf"
+    );
+    chapter!(
+        PAGING,
+        "capítulo 18 — Paging: Introduction",
+        "vm-paging.pdf"
+    );
+    chapter!(
+        TLBS,
+        "capítulo 19 — Translation Lookaside Buffers",
+        "vm-tlbs.pdf"
+    );
+    chapter!(
+        SMALLER_TABLES,
+        "capítulo 20 — Paging: Smaller Tables",
+        "vm-smalltables.pdf"
+    );
+    chapter!(
+        SWAP_MECHANISMS,
+        "capítulo 21 — Beyond Physical Memory: Mechanisms",
+        "vm-beyondphys.pdf"
+    );
+    chapter!(
+        SWAP_POLICIES,
+        "capítulo 22 — Beyond Physical Memory: Policies",
+        "vm-beyondphys-policy.pdf"
+    );
+
+    // ---- Persistência: E/S e sistemas de arquivos (parte III do livro) ----
+    chapter!(IO_DEVICES, "capítulo 36 — I/O Devices", "file-devices.pdf");
+    chapter!(HDD, "capítulo 37 — Hard Disk Drives", "file-disks.pdf");
+    chapter!(FILES_DIRS, "capítulo 39 — Files and Directories", "file-intro.pdf");
+    chapter!(
+        FS_IMPL,
+        "capítulo 40 — File System Implementation",
+        "file-implementation.pdf"
+    );
+    chapter!(FFS, "capítulo 41 — Fast File System (FFS)", "file-ffs.pdf");
+    chapter!(
+        JOURNALING,
+        "capítulo 42 — Crash Consistency: FSCK and Journaling",
+        "file-journaling.pdf"
+    );
+    chapter!(
+        LFS,
+        "capítulo 43 — Log-structured File Systems (LFS)",
+        "file-lfs.pdf"
+    );
+    chapter!(SSD, "capítulo 44 — Flash-based SSDs", "file-ssd.pdf");
 }
 
 /// Um bloco de conteúdo dentro de um artigo.
@@ -113,6 +190,40 @@ pub enum Block {
     Demo(&'static Demo),
     /// Simulador de escalonamento com diagrama de Gantt.
     Scheduler(&'static gantt::Scenario),
+    /// As três organizações da memória sem abstração (seção 3.1).
+    MemLayouts,
+    /// A MMU entre o processador e a memória (seção 3.3.1).
+    MmuDiagram,
+    /// Os campos de uma entrada da tabela de páginas (seção 3.3.2).
+    PteDiagram,
+    /// Registradores de base e limite, com endereço editável (seção 3.2.1).
+    BaseLimit,
+    /// Simulador de gerenciamento de memória livre (seção 3.2.3).
+    Allocator(&'static memfit::Scenario),
+    /// Tradutor de endereços virtuais, com ou sem TLB (seções 3.3.1–3.3.3).
+    Translator(&'static memaddr::TranslateScenario),
+    /// Simulador de substituição de páginas (seção 3.4).
+    Replacer(&'static pagerepl::Scenario),
+    /// Faltas de página de todos os algoritmos, na mesma carga (seção 3.4).
+    ReplCompare(&'static pagerepl::Scenario),
+    /// Curva do desperdício em função do tamanho da página (seção 3.5.4).
+    PageSizeCalc,
+    /// Esquema de uma partição: MBR/GPT e o bloco de inicialização (4.3.1).
+    DiskPartition,
+    /// Layout de um sistema de arquivos no disco (4.3.1 e 4.3.2).
+    FsLayout,
+    /// O i-node e seu índice de vários níveis (4.3.2).
+    InodeIndex,
+    /// Comparação dos métodos de alocação de blocos (4.3.2).
+    AllocMethods,
+    /// O dispositivo canônico: interface e interior (5.1.2).
+    DeviceModel,
+    /// Acesso direto à memória (5.1.4).
+    DmaDiagram,
+    /// As camadas do software de E/S (5.3).
+    IoLayers,
+    /// Simulador das três formas de E/S: programa, interrupção e DMA (5.2).
+    IoModes,
     /// Convite para abrir outra tela do app.
     SeeAlso(&'static str, Screen),
 }
@@ -137,6 +248,12 @@ pub struct ReaderState {
     pub selected: usize,
     demos: HashMap<&'static str, DemoState>,
     scheds: HashMap<&'static str, SchedState>,
+    fits: HashMap<&'static str, FitState>,
+    translators: HashMap<&'static str, TranslateState>,
+    repls: HashMap<&'static str, ReplState>,
+    base_limit: BaseLimitState,
+    page_size: PageSizeState,
+    io_modes: IoModesState,
 }
 
 /// Desenha índice + artigo. Devolve a tela para onde navegar, se houver clique.
@@ -255,8 +372,8 @@ fn article_ui(ui: &mut egui::Ui, art: &Article, st: &mut ReaderState) -> Option<
     ui.separator();
     ui.add_space(6.0);
 
-    for block in art.blocks {
-        if let Some(s) = block_ui(ui, block, st) {
+    for (i, block) in art.blocks.iter().enumerate() {
+        if let Some(s) = block_ui(ui, i, block, st) {
             goto = Some(s);
         }
     }
@@ -266,7 +383,14 @@ fn article_ui(ui: &mut egui::Ui, art: &Article, st: &mut ReaderState) -> Option<
     goto
 }
 
-fn block_ui(ui: &mut egui::Ui, block: &Block, st: &mut ReaderState) -> Option<Screen> {
+/// `index` é a posição do bloco no artigo: entra no id dos widgets com estado
+/// (duas tabelas iguais no mesmo artigo não podem dividir o mesmo id).
+fn block_ui(
+    ui: &mut egui::Ui,
+    index: usize,
+    block: &Block,
+    st: &mut ReaderState,
+) -> Option<Screen> {
     let mut goto = None;
     match block {
         Block::H(t) => {
@@ -336,17 +460,24 @@ fn block_ui(ui: &mut egui::Ui, block: &Block, st: &mut ReaderState) -> Option<Sc
         }
         Block::Table2(head_a, head_b, rows) => {
             ui.add_space(10.0);
-            egui::Grid::new(("tbl", *head_a, *head_b, rows.len()))
+            // Numa Grid o texto não quebra linha sozinho: limitamos a largura
+            // das colunas à metade do espaço e pedimos o `wrap()` em cada célula.
+            let col_w = ((ui.available_width() - 16.0 - 12.0) / 2.0).max(80.0);
+            let cell = |ui: &mut egui::Ui, text: egui::RichText| {
+                ui.add(egui::Label::new(text).wrap());
+            };
+            egui::Grid::new(("tbl", index))
                 .num_columns(2)
+                .max_col_width(col_w)
                 .spacing([16.0, 9.0])
                 .striped(true)
                 .show(ui, |ui| {
-                    ui.label(egui::RichText::new(*head_a).strong().color(ACCENT));
-                    ui.label(egui::RichText::new(*head_b).strong().color(ACCENT));
+                    cell(ui, egui::RichText::new(*head_a).strong().color(ACCENT));
+                    cell(ui, egui::RichText::new(*head_b).strong().color(ACCENT));
                     ui.end_row();
                     for (a, b) in *rows {
-                        ui.label(egui::RichText::new(*a).size(13.5));
-                        ui.label(egui::RichText::new(*b).size(13.5));
+                        cell(ui, egui::RichText::new(*a).size(13.5));
+                        cell(ui, egui::RichText::new(*b).size(13.5));
                         ui.end_row();
                     }
                 });
@@ -372,6 +503,104 @@ fn block_ui(ui: &mut egui::Ui, block: &Block, st: &mut ReaderState) -> Option<Sc
             gantt::show(ui, scenario, state);
             ui.add_space(6.0);
         }
+        Block::MemLayouts => {
+            ui.add_space(12.0);
+            memaddr::layouts_diagram(ui);
+            ui.add_space(6.0);
+        }
+        Block::MmuDiagram => {
+            ui.add_space(12.0);
+            memaddr::mmu_diagram(ui);
+            ui.add_space(6.0);
+        }
+        Block::PteDiagram => {
+            ui.add_space(12.0);
+            memaddr::pte_diagram(ui);
+            ui.add_space(6.0);
+        }
+        Block::BaseLimit => {
+            ui.add_space(12.0);
+            memaddr::base_limit(ui, &mut st.base_limit);
+            ui.add_space(6.0);
+        }
+        Block::Allocator(scenario) => {
+            ui.add_space(12.0);
+            let state = st
+                .fits
+                .entry(scenario.id)
+                .or_insert_with(|| FitState::new(scenario));
+            memfit::show(ui, scenario, state);
+            ui.add_space(6.0);
+        }
+        Block::Translator(scenario) => {
+            ui.add_space(12.0);
+            let state = st.translators.entry(scenario.id).or_default();
+            memaddr::translator(ui, scenario, state);
+            ui.add_space(6.0);
+        }
+        Block::Replacer(scenario) => {
+            ui.add_space(12.0);
+            let state = st
+                .repls
+                .entry(scenario.id)
+                .or_insert_with(|| ReplState::new(scenario));
+            pagerepl::show(ui, scenario, state);
+            ui.add_space(6.0);
+        }
+        Block::ReplCompare(scenario) => {
+            ui.add_space(12.0);
+            let state = st
+                .repls
+                .entry(scenario.id)
+                .or_insert_with(|| ReplState::new(scenario));
+            pagerepl::compare(ui, scenario, state);
+            ui.add_space(6.0);
+        }
+        Block::PageSizeCalc => {
+            ui.add_space(12.0);
+            memaddr::page_size_calc(ui, &mut st.page_size);
+            ui.add_space(6.0);
+        }
+        Block::DiskPartition => {
+            ui.add_space(12.0);
+            fsview::disk_partition(ui);
+            ui.add_space(6.0);
+        }
+        Block::FsLayout => {
+            ui.add_space(12.0);
+            fsview::fs_layout(ui);
+            ui.add_space(6.0);
+        }
+        Block::InodeIndex => {
+            ui.add_space(12.0);
+            fsview::inode_index(ui);
+            ui.add_space(6.0);
+        }
+        Block::AllocMethods => {
+            ui.add_space(12.0);
+            fsview::alloc_methods(ui);
+            ui.add_space(6.0);
+        }
+        Block::DeviceModel => {
+            ui.add_space(12.0);
+            ioview::device_model(ui);
+            ui.add_space(6.0);
+        }
+        Block::DmaDiagram => {
+            ui.add_space(12.0);
+            ioview::dma_diagram(ui);
+            ui.add_space(6.0);
+        }
+        Block::IoLayers => {
+            ui.add_space(12.0);
+            ioview::io_layers(ui);
+            ui.add_space(6.0);
+        }
+        Block::IoModes => {
+            ui.add_space(12.0);
+            ioview::show(ui, &mut st.io_modes);
+            ui.add_space(6.0);
+        }
         Block::SeeAlso(t, screen) => {
             ui.add_space(10.0);
             egui::Frame::new()
@@ -380,7 +609,9 @@ fn block_ui(ui: &mut egui::Ui, block: &Block, st: &mut ReaderState) -> Option<Sc
                 .fill(ui.visuals().faint_bg_color)
                 .show(ui, |ui| {
                     ui.set_min_width(ui.available_width());
-                    ui.horizontal(|ui| {
+                    // `horizontal_wrapped`: o texto quebra linha e o botão vai
+                    // para a linha seguinte quando não cabe ao lado.
+                    ui.horizontal_wrapped(|ui| {
                         ui.label(egui::RichText::new("↪").size(15.0).color(ACCENT));
                         ui.label(egui::RichText::new(*t).size(13.5));
                         if ui.button(format!("Abrir  {}", screen.title())).clicked() {
@@ -404,7 +635,9 @@ fn callout(ui: &mut egui::Ui, icon: &str, text: &str, fill: egui::Color32) {
             ui.horizontal_top(|ui| {
                 ui.label(egui::RichText::new(icon).size(15.0));
                 ui.add_space(2.0);
-                ui.label(egui::RichText::new(text).size(14.0));
+                // Em layouts horizontais o egui não quebra linha por padrão
+                // (`TextWrapMode::Extend`): sem o `wrap()` a caixa vazaria.
+                ui.add(egui::Label::new(egui::RichText::new(text).size(14.0)).wrap());
             });
         });
     ui.add_space(4.0);
@@ -420,7 +653,7 @@ fn bullet_row(ui: &mut egui::Ui, marker: &str, text: &str) {
                 .monospace(),
         );
         ui.add_space(2.0);
-        ui.label(egui::RichText::new(text).size(14.5));
+        ui.add(egui::Label::new(egui::RichText::new(text).size(14.5)).wrap());
     });
     ui.add_space(3.0);
 }
@@ -460,10 +693,17 @@ fn references(ui: &mut egui::Ui, art: &Article) {
 
     ui.horizontal_top(|ui| {
         ui.add_space(6.0);
-        ui.label(
-            egui::RichText::new(format!("{TANENBAUM} {}.", art.section))
+        ui.add(
+            egui::Label::new(
+                egui::RichText::new(format!(
+                    "{TANENBAUM} {}, seção {}.",
+                    chapter_of(art.section),
+                    art.section
+                ))
                 .size(12.5)
                 .color(egui::Color32::GRAY),
+            )
+            .wrap(),
         );
     });
 
@@ -486,7 +726,7 @@ fn references(ui: &mut egui::Ui, art: &Article) {
                 ui.horizontal(|ui| {
                     ui.add_space(8.0);
                     ui.label(
-                        egui::RichText::new("↳")
+                        egui::RichText::new("↪")
                             .size(12.0)
                             .color(egui::Color32::GRAY),
                     );
@@ -603,24 +843,25 @@ fn state_diagram(ui: &mut egui::Ui) {
     );
 }
 
-/// Validação de conteúdo, compartilhada pelos três módulos de artigos.
+/// Validação de conteúdo, compartilhada por todos os módulos de artigos.
 ///
-/// Fica aqui para os três serem checados pelas mesmas regras — e para uma
+/// Fica aqui para todos serem checados pelas mesmas regras — e para uma
 /// variante nova de [`Block`] quebrar a compilação dos testes até ser coberta.
 #[cfg(test)]
 pub mod check {
     use super::*;
     use crate::ui::demo;
 
-    pub fn articles(list: &'static [Article]) {
+    /// `chapter` é o capítulo do Tanenbaum que todos os artigos devem citar.
+    pub fn articles(list: &'static [Article], chapter: char) {
         assert!(!list.is_empty(), "lista de artigos vazia");
         for a in list {
             assert!(!a.title.trim().is_empty(), "artigo sem título");
             assert!(!a.summary.trim().is_empty(), "'{}' sem resumo", a.title);
             assert!(!a.blocks.is_empty(), "'{}' sem blocos", a.title);
             assert!(
-                a.section.starts_with('2'),
-                "'{}' deveria citar uma seção do capítulo 2, veio '{}'",
+                chapter_of(a.section) == chapter,
+                "'{}' deveria citar uma seção do capítulo {chapter}, veio '{}'",
                 a.title,
                 a.section
             );
@@ -648,10 +889,15 @@ pub mod check {
         let nonempty = |t: &str| assert!(!t.trim().is_empty(), "texto vazio em '{title}'");
         match b {
             Block::H(t) | Block::P(t) | Block::Note(t) | Block::Warn(t) => nonempty(t),
-            Block::L(items) | Block::N(items) | Block::Code(items) => {
+            Block::L(items) | Block::N(items) => {
                 assert!(!items.is_empty(), "lista vazia em '{title}'");
                 items.iter().for_each(|i| nonempty(i));
             }
+            // Código pode ter linhas em branco, mas não ser só isso.
+            Block::Code(lines) => assert!(
+                lines.iter().any(|l| !l.trim().is_empty()),
+                "código vazio em '{title}'"
+            ),
             Block::Defs(pairs) => {
                 assert!(!pairs.is_empty(), "definições vazias em '{title}'");
                 for (t, d) in *pairs {
@@ -663,8 +909,13 @@ pub mod check {
                 nonempty(ha);
                 nonempty(hb);
                 assert!(!rows.is_empty(), "tabela vazia em '{title}'");
-                // A 2ª coluna pode ficar vazia quando um lado tem menos itens.
-                rows.iter().for_each(|(x, _)| nonempty(x));
+                // Um dos lados pode ficar vazio quando tem menos itens que o outro.
+                for (a, b) in *rows {
+                    assert!(
+                        !a.trim().is_empty() || !b.trim().is_empty(),
+                        "linha de tabela vazia em '{title}'"
+                    );
+                }
             }
             Block::SeeAlso(t, _) => nonempty(t),
             Block::Demo(d) => demo::check(d),
@@ -676,7 +927,23 @@ pub mod check {
                     assert!(j.burst >= 1, "processo '{}' com duração 0", j.name);
                 }
             }
-            Block::StateDiagram => {}
+            Block::Allocator(s) => memfit::check(s),
+            Block::Translator(s) => nonempty(s.hint),
+            Block::Replacer(s) | Block::ReplCompare(s) => pagerepl::check(s),
+            Block::StateDiagram
+            | Block::MemLayouts
+            | Block::MmuDiagram
+            | Block::PteDiagram
+            | Block::BaseLimit
+            | Block::PageSizeCalc
+            | Block::DiskPartition
+            | Block::FsLayout
+            | Block::InodeIndex
+            | Block::AllocMethods
+            | Block::DeviceModel
+            | Block::DmaDiagram
+            | Block::IoLayers
+            | Block::IoModes => {}
         }
     }
 }

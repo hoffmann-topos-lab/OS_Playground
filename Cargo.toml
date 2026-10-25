@@ -17,3 +17,6 @@ path = "src/bin/make_icons.rs"
 eframe = "0.35.0"
 image = "0.25.10"
 sysinfo = "0.39.6"
+
+[dev-dependencies]
+egui_kittest = { version = "0.35", features = ["wgpu", "snapshot"] }
