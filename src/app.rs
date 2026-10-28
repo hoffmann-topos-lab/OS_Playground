@@ -29,6 +29,12 @@ pub enum Screen {
     IoMenu,
     DeviceBrowser,
     IoConcepts,
+    // ---- Impasses (capítulo 6) ----
+    DeadlockMenu,
+    DeadlockConcepts,
+    DiningPhilosophers,
+    DeadlockDetection,
+    DeadlockAvoidance,
 }
 
 impl Screen {
@@ -53,6 +59,11 @@ impl Screen {
             Screen::IoMenu => "Entrada e Saída",
             Screen::DeviceBrowser => "Dispositivos ao Vivo",
             Screen::IoConcepts => "Entrada e Saída — Conceitos",
+            Screen::DeadlockMenu => "Impasses",
+            Screen::DeadlockConcepts => "Impasses — Conceitos",
+            Screen::DiningPhilosophers => "O Jantar dos Filósofos",
+            Screen::DeadlockDetection => "Detecção e Recuperação",
+            Screen::DeadlockAvoidance => "Como Evitar Impasses",
         }
     }
 }
@@ -77,6 +88,11 @@ pub struct OsPlaygroundApp {
     pub files: ui::reader::ReaderState,
     pub fsimpl: ui::reader::ReaderState,
     pub io: ui::reader::ReaderState,
+    /// Telas-leitor dos Impasses (capítulo 6).
+    pub deadlock: ui::reader::ReaderState,
+    pub philosophers: ui::reader::ReaderState,
+    pub detection: ui::reader::ReaderState,
+    pub avoidance: ui::reader::ReaderState,
     /// Telas ao vivo do capítulo 4 e do capítulo 5.
     pub explorer: ui::explorer::ExplorerState,
     pub devices: ui::devices::DevicesState,
@@ -101,6 +117,10 @@ impl OsPlaygroundApp {
             files: ui::reader::ReaderState::default(),
             fsimpl: ui::reader::ReaderState::default(),
             io: ui::reader::ReaderState::default(),
+            deadlock: ui::reader::ReaderState::default(),
+            philosophers: ui::reader::ReaderState::default(),
+            detection: ui::reader::ReaderState::default(),
+            avoidance: ui::reader::ReaderState::default(),
             explorer: ui::explorer::ExplorerState::default(),
             devices: ui::devices::DevicesState::default(),
         };
@@ -124,6 +144,10 @@ impl OsPlaygroundApp {
                 Some(Screen::FileSystemMenu)
             }
             Screen::DeviceBrowser | Screen::IoConcepts => Some(Screen::IoMenu),
+            Screen::DeadlockConcepts
+            | Screen::DiningPhilosophers
+            | Screen::DeadlockDetection
+            | Screen::DeadlockAvoidance => Some(Screen::DeadlockMenu),
             _ => None,
         };
         if let Some(m) = menu {
@@ -141,6 +165,10 @@ impl OsPlaygroundApp {
             Screen::FilesConcepts => Some(&mut self.files),
             Screen::FileSystemImpl => Some(&mut self.fsimpl),
             Screen::IoConcepts => Some(&mut self.io),
+            Screen::DeadlockConcepts => Some(&mut self.deadlock),
+            Screen::DiningPhilosophers => Some(&mut self.philosophers),
+            Screen::DeadlockDetection => Some(&mut self.detection),
+            Screen::DeadlockAvoidance => Some(&mut self.avoidance),
             _ => None,
         };
         if let Some(r) = reader {
@@ -210,6 +238,11 @@ impl eframe::App for OsPlaygroundApp {
             Screen::IoMenu => ui::topic_menu::show(self, ui, ui::topic_menu::IO),
             Screen::DeviceBrowser => ui::devices::show(self, ui),
             Screen::IoConcepts => ui::io::show(self, ui),
+            Screen::DeadlockMenu => ui::topic_menu::show(self, ui, ui::topic_menu::DEADLOCK),
+            Screen::DeadlockConcepts => ui::deadlock::show(self, ui),
+            Screen::DiningPhilosophers => ui::philosophers::show(self, ui),
+            Screen::DeadlockDetection => ui::detection::show(self, ui),
+            Screen::DeadlockAvoidance => ui::avoidance::show(self, ui),
         });
     }
 }
@@ -241,6 +274,11 @@ fn start_screen() -> Option<(Screen, usize)> {
         "iomenu" => Screen::IoMenu,
         "devices" => Screen::DeviceBrowser,
         "io" => Screen::IoConcepts,
+        "deadlockmenu" | "impasses" => Screen::DeadlockMenu,
+        "deadlock" | "impasse" => Screen::DeadlockConcepts,
+        "philosophers" | "philo" | "filosofos" => Screen::DiningPhilosophers,
+        "detection" | "deteccao" => Screen::DeadlockDetection,
+        "avoidance" | "banker" | "banqueiro" => Screen::DeadlockAvoidance,
         _ => return None,
     };
     Some((screen, article.trim().parse().unwrap_or(0)))

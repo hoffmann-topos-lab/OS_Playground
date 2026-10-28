@@ -11,6 +11,7 @@ use eframe::egui;
 
 use crate::app::Screen;
 use crate::ui::ACCENT;
+use crate::ui::deadlockview::{self, BankerState, MatrixState, RagState};
 use crate::ui::demo::{self, Demo, DemoState};
 use crate::ui::fsview;
 use crate::ui::gantt::{self, SchedState};
@@ -18,6 +19,7 @@ use crate::ui::ioview::{self, IoModesState};
 use crate::ui::memaddr::{self, BaseLimitState, PageSizeState, TranslateState};
 use crate::ui::memfit::{self, FitState};
 use crate::ui::pagerepl::{self, ReplState};
+use crate::ui::philo::{self, PhiloState};
 
 const TANENBAUM: &str = "TANENBAUM, A. S.; BOS, H. Sistemas Operacionais Modernos — capítulo";
 const OSTEP: &str = "ARPACI-DUSSEAU, R. H.; ARPACI-DUSSEAU, A. C. \
@@ -224,6 +226,18 @@ pub enum Block {
     IoLayers,
     /// Simulador das três formas de E/S: programa, interrupção e DMA (5.2).
     IoModes,
+    /// Simulador do jantar dos filósofos (seção 6.2).
+    Philosophers,
+    /// Grafo de alocação de recursos com um ciclo (seção 6.3.8).
+    RagDiagram,
+    /// Trajetória de recursos para dois processos (seção 6.6.13).
+    Trajectory,
+    /// Grafo de alocação com detecção de ciclo (seções 6.5.2 a 6.5.5).
+    ResourceGraph,
+    /// Detecção de impasse com vários recursos de cada tipo (seções 6.5.6 a 6.5.15).
+    DeadlockMatrix,
+    /// Algoritmo do banqueiro (seções 6.6.7 a 6.6.11).
+    Banker,
     /// Convite para abrir outra tela do app.
     SeeAlso(&'static str, Screen),
 }
@@ -254,6 +268,10 @@ pub struct ReaderState {
     base_limit: BaseLimitState,
     page_size: PageSizeState,
     io_modes: IoModesState,
+    philo: PhiloState,
+    rag: RagState,
+    matrix: MatrixState,
+    banker: BankerState,
 }
 
 /// Desenha índice + artigo. Devolve a tela para onde navegar, se houver clique.
@@ -601,6 +619,36 @@ fn block_ui(
             ioview::show(ui, &mut st.io_modes);
             ui.add_space(6.0);
         }
+        Block::Philosophers => {
+            ui.add_space(12.0);
+            philo::show(ui, &mut st.philo);
+            ui.add_space(6.0);
+        }
+        Block::RagDiagram => {
+            ui.add_space(12.0);
+            deadlockview::rag_diagram(ui);
+            ui.add_space(6.0);
+        }
+        Block::Trajectory => {
+            ui.add_space(12.0);
+            deadlockview::trajectory(ui);
+            ui.add_space(6.0);
+        }
+        Block::ResourceGraph => {
+            ui.add_space(12.0);
+            deadlockview::resource_graph(ui, &mut st.rag);
+            ui.add_space(6.0);
+        }
+        Block::DeadlockMatrix => {
+            ui.add_space(12.0);
+            deadlockview::matrix_detect(ui, &mut st.matrix);
+            ui.add_space(6.0);
+        }
+        Block::Banker => {
+            ui.add_space(12.0);
+            deadlockview::banker(ui, &mut st.banker);
+            ui.add_space(6.0);
+        }
         Block::SeeAlso(t, screen) => {
             ui.add_space(10.0);
             egui::Frame::new()
@@ -943,7 +991,13 @@ pub mod check {
             | Block::DeviceModel
             | Block::DmaDiagram
             | Block::IoLayers
-            | Block::IoModes => {}
+            | Block::IoModes
+            | Block::Philosophers
+            | Block::RagDiagram
+            | Block::Trajectory
+            | Block::ResourceGraph
+            | Block::DeadlockMatrix
+            | Block::Banker => {}
         }
     }
 }

@@ -108,6 +108,34 @@ pub const IO: &[Opcao] = &[
     },
 ];
 
+/// As 4 opções de "Impasses" (capítulo 6).
+pub const DEADLOCK: &[Opcao] = &[
+    Opcao {
+        icone: "🧭",
+        titulo: "Conceitos de Impasses",
+        descricao: "Recursos preemptíveis e não preemptíveis, a definição formal, as quatro condições de Coffman, a modelagem por grafos, o algoritmo do avestruz e a prevenção.",
+        tela: Screen::DeadlockConcepts,
+    },
+    Opcao {
+        icone: "🍝",
+        titulo: "O Jantar dos Filósofos",
+        descricao: "O exemplo clássico de Dijkstra num simulador animado: a solução ingênua que trava, o recuo aleatório e a solução definitiva que nunca bloqueia.",
+        tela: Screen::DiningPhilosophers,
+    },
+    Opcao {
+        icone: "🔎",
+        titulo: "Detecção e Recuperação",
+        descricao: "A busca por ciclo no grafo de alocação e a detecção por matrizes com vários recursos de cada tipo, mais as três formas de recuperar o sistema.",
+        tela: Screen::DeadlockDetection,
+    },
+    Opcao {
+        icone: "🏦",
+        titulo: "Como Evitar Impasses",
+        descricao: "Estados seguros e inseguros, o algoritmo do banqueiro com matrizes editáveis e a trajetória de recursos para dois processos.",
+        tela: Screen::DeadlockAvoidance,
+    },
+];
+
 pub fn show(app: &mut OsPlaygroundApp, ui: &mut egui::Ui, opcoes: &[Opcao]) {
     ui.add_space(16.0);
     ui.vertical_centered(|ui| {

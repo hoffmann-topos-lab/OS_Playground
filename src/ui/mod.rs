@@ -39,6 +39,18 @@ pub mod content_io;
 pub mod io;
 pub mod ioview;
 
+// ---- Impasses (capítulo 6) ----
+pub mod avoidance;
+pub mod content_avoidance;
+pub mod content_deadlock;
+pub mod content_detection;
+pub mod content_philo;
+pub mod deadlock;
+pub mod deadlockview;
+pub mod detection;
+pub mod philo;
+pub mod philosophers;
+
 // ---- comuns ----
 pub mod home;
 pub mod reader;

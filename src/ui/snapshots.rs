@@ -16,8 +16,9 @@ use eframe::egui;
 use egui_kittest::Harness;
 
 use crate::ui::{
-    content, content_addressing, content_files, content_fsimpl, content_io, content_pagedesign,
-    content_paging, content_replacement, devices, explorer, reader, theme,
+    content, content_addressing, content_avoidance, content_deadlock, content_detection,
+    content_files, content_fsimpl, content_io, content_pagedesign, content_paging, content_philo,
+    content_replacement, devices, explorer, reader, theme,
 };
 
 fn out_dir() -> PathBuf {
@@ -129,6 +130,21 @@ fn snapshots_fsimpl() {
 fn snapshots_io() {
     for (i, art) in content_io::ARTICLES.iter().enumerate() {
         reader_screen(&format!("io_{i}_{}", slug(art.title)), content_io::ARTICLES, i);
+    }
+}
+
+#[test]
+#[ignore]
+fn snapshots_deadlock() {
+    for (tag, arts) in [
+        ("concepts", content_deadlock::ARTICLES),
+        ("philo", content_philo::ARTICLES),
+        ("detection", content_detection::ARTICLES),
+        ("avoidance", content_avoidance::ARTICLES),
+    ] {
+        for (i, art) in arts.iter().enumerate() {
+            reader_screen(&format!("deadlock_{tag}_{i}_{}", slug(art.title)), arts, i);
+        }
     }
 }
 
