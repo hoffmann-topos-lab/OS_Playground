@@ -44,6 +44,15 @@ As telas ao vivo (Explorador e Dispositivos) leem o sistema real desta máquina
 via `std::os::unix::fs`, então só fazem sentido em UNIX (no macOS e no Linux os
 dados existem todos).
 
+### 5 — Impasses
+
+| Opção | Status |
+|-------|--------|
+|  Conceitos de Impasses |  funcional (6 artigos, §6.0–6.1, §6.3–6.4 e §6.7, com o grafo de alocação e as quatro condições de Coffman) |
+|  O Jantar dos Filósofos |  funcional (2 artigos, §6.2, com o simulador animado de 3 estratégias) |
+|  Detecção e Recuperação |  funcional (3 artigos, §6.5, com o grafo de alocação editável e a detecção por matrizes) |
+|  Como Evitar Impasses |  funcional (3 artigos, §6.6, com o algoritmo do banqueiro e a trajetória de recursos) |
+
 ## Processos e Threads
 
 ### Árvore de Processos
@@ -262,6 +271,60 @@ sozinho e a CPU nem participa da transferência. Um medidor mostra o aproveitame
 O `▶` toca a linha do tempo, `↺` reinicia, e o controle deslizante vai direto a
 qualquer instante.
 
+## Impasses
+
+### Conceitos de Impasses
+
+Seis artigos: o que é um impasse, os recursos preemptíveis e não preemptíveis, a
+definição formal e as quatro condições de Coffman, a modelagem por grafos de
+alocação, o algoritmo do avestruz, e a prevenção que ataca cada uma das quatro
+condições.
+
+O artigo da modelagem traz o **grafo de alocação com um ciclo** desenhado pelo
+app (seção 6.3.8): os processos em círculos, os recursos em quadrados, e o ciclo
+que confirma o impasse em destaque.
+
+### O Jantar dos Filósofos
+
+Dois artigos (o problema e as três soluções) com o **simulador animado** do
+exemplo clássico de Dijkstra. Cinco filósofos à mesa, cada um pensando, com fome
+ou comendo, e os garfos entre eles. Três estratégias lado a lado: a ingênua, que
+pega o garfo da esquerda e trava quando todos pegam ao mesmo tempo, o recuo
+aleatório, que larga o garfo e tenta de novo, e a solução definitiva com estados
+e sinalização, que nunca bloqueia. O simulador detecta o impasse quando ele
+acontece e deixa ver que dois vizinhos nunca comem ao mesmo tempo.
+
+### Detecção e Recuperação
+
+Três artigos: a detecção com um único recurso de cada tipo, a detecção com várias
+unidades de cada recurso, e as três formas de recuperar o sistema.
+
+O primeiro traz um **grafo de alocação editável**. Você ajusta quantos processos
+e recursos existem (botões `−`/`+`) e, numa matriz processo × recurso, marca com
+um clique em cada cruzamento quem **detém** o recurso (arco recurso ➡ processo) e
+quem o **pede** (arco processo ➡ recurso). Como há um único recurso de cada tipo,
+um recurso tem sempre um só detentor. Quatro exemplos prontos partem de cenários
+conhecidos, inclusive o do livro (seção 6.5.4), com sete processos e seis recursos
+e um ciclo escondido entre processos que não travam. O `▶` percorre o grafo
+construindo a lista L nó a nó, até um nó reaparecer e fechar o ciclo que denuncia
+o impasse.
+
+O segundo traz a **detecção por matrizes** para várias unidades de cada recurso
+(seção 6.5.11): a alocação, a requisição e o vetor de disponíveis são editáveis, e
+a marcação dos processos que conseguem terminar é revelada passo a passo,
+apontando ao final quais ficaram em impasse.
+
+### Como Evitar Impasses
+
+Três artigos: os estados seguros e inseguros, o algoritmo do banqueiro, e a
+trajetória de recursos.
+
+O **algoritmo do banqueiro** tem o crédito máximo e o já alocado editáveis, com
+dois presets (um recurso e vários). Ele decide se o estado é seguro e, quando é,
+mostra a ordem de escalonamento que leva todos ao fim. A **trajetória de recursos**
+desenha o progresso de dois processos num plano, com as regiões proibidas e um
+caminho seguro que as contorna.
+
 ## Como executar (app)
 
 Requer apenas o toolchain **Rust**.
@@ -275,7 +338,8 @@ make run             # modo release
 Para abrir direto numa tela (útil para projetar em aula), use
 `OS_PLAYGROUND_START="tela[/artigo]"`, com `tela` em `tree`, `texts`, `race`,
 `scheduling`, `addressing`, `paging`, `replacement`, `design`, `explorer`,
-`files`, `fsimpl`, `devices`, `io` e o artigo como índice a partir de 0:
+`files`, `fsimpl`, `devices`, `io`, `deadlock`, `philosophers`, `detection`,
+`avoidance` e o artigo como índice a partir de 0:
 
 ```bash
 OS_PLAYGROUND_START=replacement/4 cargo run    # segunda chance e relógio
@@ -338,8 +402,8 @@ relógio e "o ótimo nunca perde") e checam todos os artigos (textos não vazios
 seção do capítulo certo, links do OSTEP bem formados).
 
 Os *snapshots* renderizam cada artigo das telas de Memória Virtual, Sistema de
-Arquivos e Entrada e Saída headless (via `egui_kittest`, só dependência de
-desenvolvimento) para inspeção visual. Eles precisam de uma GPU acessível ao
+Arquivos, Entrada e Saída e Impasses headless (via `egui_kittest`, só dependência
+de desenvolvimento) para inspeção visual. Eles precisam de uma GPU acessível ao
 `wgpu`, por isso ficam atrás do `--ignored`.
 
 ## Estrutura
@@ -382,6 +446,14 @@ src/
     ioview.rs          diagramas de E/S + simulador (programa × interrupção × DMA)
     devices.rs         tela ao vivo: os dispositivos de /dev (bloco × caractere)
     io.rs              (invólucro do reader)
+    -- Impasses --
+    content_deadlock.rs    artigos de Conceitos de Impasses (§6.0–6.1, §6.3–6.4, §6.7)
+    content_philo.rs       artigos do Jantar dos Filósofos (§6.2)
+    content_detection.rs   artigos de Detecção e Recuperação (§6.5)
+    content_avoidance.rs   artigos de Como Evitar Impasses (§6.6)
+    deadlockview.rs    grafo editável, detecção por matrizes, banqueiro, diagramas
+    philo.rs           simulador do jantar dos filósofos (3 estratégias, LCG)
+    deadlock.rs / philosophers.rs / detection.rs / avoidance.rs   (invólucros)
     snapshots.rs       renderização headless das telas (só em testes)
   sys/processes.rs     coleta de processos/threads (sysinfo)
   sys/fs.rs            leitura de um diretório real (i-node, stat, hard links)
